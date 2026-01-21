@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dea - My Cute Library</title>
+    <!-- Import Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Font Fredoka (Bulat & Fun) -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Dea Palette: Soft Teal & Mint */
+            --primary: #80ED99;       /* Mint Green */
+            --primary-dark: #57C785;
+            --secondary: #F8F9FA;    /* Off White */
+            --accent: #FFC8DD;       /* Pink Accent */
+            
+            --bg-app: #F0FDFA;
+            --bg-card: #FFFFFF;
+            
+            --text-main: #4A5568;
+            --text-light: #A0AEC0;
+            
+            --shadow-soft: 0 8px 25px rgba(128, 237, 153, 0.2);
+            --shadow-float: 0 12px 30px rgba(128, 237, 153, 0.4);
+            
+            --radius-app: 42px;
+            --radius-card: 24px;
+            --radius-btn: 50px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Fredoka', sans-serif; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background-color: var(--bg-app);
+            display: flex; justify-content: center; align-items: center; min-height: 100vh;
+            padding: 20px; color: var(--text-main);
+        }
+
+        /* --- CONTAINER --- */
+        .app-frame {
+            width: 100%; max-width: 380px;
+            background: var(--bg-card);
+            border-radius: var(--radius-app);
+            box-shadow: 
+                0 0 0 8px #ffffff,
+                0 35px 70px rgba(0, 0, 0, 0.08);
+            position: relative; overflow: hidden;
+            display: flex; flex-direction: column; height: 90vh;
+            border: 2px solid white;
+        }
+
+        /* --- DECOR --- */
+        .blob { position: absolute; border-radius: 50%; filter: blur(60px); z-index: 0; opacity: 0.5; }
+        .blob-1 { top: -30px; left: -30px; width: 150px; height: 150px; background: #BDE0FE; } /* Light Blue */
+        .blob-2 { bottom: 10%; right: -20px; width: 120px; height: 120px; background: #FFC8DD; } /* Pink */
+
+        /* --- HEADER --- */
+        .header { position: relative; z-index: 10; padding: 24px; background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%); }
+        
+        .top-sec { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .logo { font-size: 1.5rem; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
+        .logo i { color: var(--primary-dark); font-size: 1.7rem; }
+        
+        /* Filter Chips */
+        .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+        .filter-scroll::-webkit-scrollbar { display: none; }
+        .chip {
+            padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 500;
+            background: #F1F5F9; color: var(--text-light); white-space: nowrap; cursor: pointer; transition: 0.2s; border: 1px solid transparent;
+        }
+        .chip.active { background: var(--primary); color: white; border-color: white; box-shadow: 0 4px 12px rgba(128, 237, 153, 0.4); }
+
+        /* --- LIST --- */
+        .book-list {
+            flex: 1; overflow-y: auto; padding: 10px 20px 100px 20px; z-index: 5;
+            display: grid; grid-template-columns: 1fr; gap: 16px; scrollbar-width: none;
+        }
+        .book-list::-webkit-scrollbar { display: none; }
+
+        .book-card {
+            background: white; border-radius: var(--radius-card);
+            padding: 16px; display: flex; align-items: center; gap: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #f0f0f0;
+            transition: transform 0.2s; position: relative;
+        }
+        .book-card:active { transform: scale(0.98); }
+
+        .book-cover {
+            width: 60px; height: 80px; border-radius: 12px; background: #E2E8F0;
+            display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #CBD5E0;
+            flex-shrink: 0; overflow: hidden; position: relative;
+        }
+        .book-cover img { width: 100%; height: 100%; object-fit: cover; }
+
+        .book-info { flex: 1; }
+        .book-title { font-size: 1rem; font-weight: 600; color: var(--text-main); margin-bottom: 4px; line-height: 1.3; }
+        .book-author { font-size: 0.85rem; color: var(--text-light); margin-bottom: 8px; display: flex; align-items: center; gap: 4px; }
+        
+        .status-badge {
+            display: inline-flex; align-items: center; gap: 4px; font-size: 0.7rem; font-weight: 600;
+            padding: 4px 10px; border-radius: 10px;
+        }
+        .st-reading { background: #FEF3C7; color: #D97706; }
+        .st-done { background: #D1FAE5; color: #059669; }
+        .st-todo { background: #E2E8F0; color: #64748B; }
+
+        .book-actions { display: flex; flex-direction: column; gap: 8px; }
+        .icon-btn {
+            width: 32px; height: 32px; border-radius: 10px; border: none; background: #F8FAFC;
+            display: flex; align-items: center; justify-content: center; color: var(--text-light);
+            cursor: pointer; transition: 0.2s;
+        }
+        .icon-btn:hover { background: var(--primary); color: white; }
+        .icon-btn.del:hover { background: #FECACA; color: #EF4444; }
+
+        /* --- FAB --- */
+        .fab {
+            position: absolute; bottom: 28px; right: 24px; z-index: 20;
+            width: 58px; height: 58px; border-radius: 30px;
+            background: var(--primary-dark); color: white;
+            box-shadow: var(--shadow-float); border: none;
+            font-size: 1.6rem; cursor: pointer; transition: 0.3s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .fab:hover { transform: scale(1.1) rotate(90deg); }
+
+        /* --- MODAL --- */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(5px);
+            z-index: 100; display: flex; align-items: flex-end; justify-content: center;
+            opacity: 0; pointer-events: none; transition: 0.3s;
+        }
+        .modal-overlay.open { opacity: 1; pointer-events: auto; }
+        
+        .modal-sheet {
+            background: white; width: 100%; max-width: 380px;
+            border-top-left-radius: 36px; border-top-right-radius: 36px;
+            padding: 30px 24px 40px 24px;
+            transform: translateY(100%); transition: 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            max-height: 85vh; overflow-y: auto;
+        }
+        .modal-overlay.open .modal-sheet { transform: translateY(0); }
+
+        .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .modal-title { font-size: 1.4rem; font-weight: 600; color: var(--text-main); }
+
+        .form-group { margin-bottom: 18px; }
+        .lbl { display: block; font-size: 0.85rem; font-weight: 500; color: var(--text-light); margin-bottom: 8px; margin-left: 4px; }
+        
+        .inp {
+            width: 100%; padding: 14px; border-radius: 16px; border: 2px solid #F1F5F9;
+            background: #F8FAFC; font-family: 'Fredoka'; font-weight: 500; font-size: 0.95rem;
+            outline: none; transition: 0.2s;
+        }
+        .inp:focus { border-color: var(--primary); background: white; }
+        select.inp { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23A0AEC0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; background-size: 16px; }
+
+        .btn-save {
+            width: 100%; padding: 16px; border-radius: 25px; border: none; background: var(--primary-dark);
+            color: white; font-weight: 600; font-size: 1rem; cursor: pointer; margin-top: 10px;
+            box-shadow: 0 8px 20px rgba(87, 199, 133, 0.4);
+        }
+        .btn-cancel { width: 100%; margin-top: 12px; border: none; background: transparent; color: var(--text-light); font-weight: 500; cursor: pointer; }
+
+        /* Upload */
+        .upload-box {
+            height: 100px; border: 2px dashed #E2E8F0; border-radius: 16px; background: #F8FAFC;
+            display: flex; align-items: center; justify-content: center; flex-direction: column;
+            cursor: pointer; position: relative; overflow: hidden;
+        }
+        .upload-box input { position: absolute; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+        .preview-thumb { position: absolute; width: 100%; height: 100%; object-fit: cover; display: none; }
+
+        /* Empty */
+        .empty-box { text-align: center; padding-top: 60px; color: var(--text-light); }
+        .empty-box i { font-size: 3rem; margin-bottom: 10px; color: #CBD5E0; }
+
+        /* Toast */
+        .toast {
+            position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-50px);
+            background: #2D3748; color: white; padding: 12px 24px; border-radius: 30px;
+            font-size: 0.9rem; z-index: 200; opacity: 0; transition: 0.3s; box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    </style>
+</head>
+<body>
+
+<div class="app-frame">
+    <!-- Decor -->
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast">
+        <i class="ph-fill ph-check-circle" style="color:#4ADE80"></i> <span id="toastMsg">Saved!</span>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="top-sec">
+            <div class="logo">
+                <i class="ph-fill ph-books"></i> Dea
+            </div>
+            <div style="font-size:0.8rem; color:var(--text-light); font-weight:500;">My Library</div>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="filter-scroll">
+            <div class="chip active" onclick="dea.filter('all', this)">Semua</div>
+            <div class="chip" onclick="dea.filter('todo', this)">Ingin Baca</div>
+            <div class="chip" onclick="dea.filter('reading', this)">Sedang Baca</div>
+            <div class="chip" onclick="dea.filter('done', this)">Selesai</div>
+        </div>
+    </header>
+
+    <!-- List -->
+    <div class="book-list" id="bookList">
+        <div class="empty-box">
+            <i class="ph ph-book-open-text"></i>
+            <p>Rak buku masih kosong...</p>
+        </div>
+    </div>
+
+    <!-- FAB -->
+    <button class="fab" onclick="dea.openModal()">
+        <i class="ph ph-plus"></i>
+    </button>
+</div>
+
+<!-- Modal Form -->
+<div class="modal-overlay" id="modal">
+    <div class="modal-sheet">
+        <div class="modal-head">
+            <div class="modal-title" id="modalTitle">Tambah Buku</div>
+            <div style="cursor:pointer; font-size:1.5rem;" onclick="dea.closeModal()">&times;</div>
+        </div>
+        
+        <form id="bookForm" onsubmit="event.preventDefault(); dea.save();">
+            <input type="hidden" id="bookId">
+            
+            <div class="form-group">
+                <label class="lbl">Cover Buku</label>
+                <div class="upload-box" onclick="document.getElementById('inpFile').click()">
+                    <input type="file" id="inpFile" accept="image/*" onchange="dea.handleFile(this)">
+                    <div id="uploadText" style="font-size:0.8rem; color:#cbd5e0; text-align:center;">
+                        <i class="ph ph-image" style="font-size:1.5rem"></i><br>Tap untuk upload
+                    </div>
+                    <img id="imgPreview" class="preview-thumb">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="lbl">Judul Buku</label>
+                <input type="text" id="inpTitle" class="inp" placeholder="Contoh: Laskar Pelangi" required>
+            </div>
+
+            <div class="form-group">
+                <label class="lbl">Penulis</label>
+                <input type="text" id="inpAuthor" class="inp" placeholder="Nama penulis..." required>
+            </div>
+
+            <div class="form-group">
+                <label class="lbl">Status Baca</label>
+                <select id="inpStatus" class="inp">
+                    <option value="todo">Ingin Baca</option>
+                    <option value="reading">Sedang Baca</option>
+                    <option value="done">Selesai</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn-save">Simpan ke Rak</button>
+            <button type="button" class="btn-cancel" onclick="dea.closeModal()">Batal</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const dea = {
+        books: [
+            { id: '1', title: 'Atomic Habits', author: 'James Clear', status: 'reading', photo: null },
+            { id: '2', title: 'Filosofi Teras', author: 'Henry Manampiring', status: 'done', photo: null },
+            { id: '3', title: 'Bumi Manusia', author: 'Pramoedya A. Toer', status: 'todo', photo: null }
+        ],
+        currentFilter: 'all',
+        tempPhoto: null,
+
+        init() {
+            this.render();
+        },
+
+        render() {
+            const list = document.getElementById('bookList');
+            let filtered = this.books;
+
+            if (this.currentFilter !== 'all') {
+                filtered = this.books.filter(b => b.status === this.currentFilter);
+            }
+
+            list.innerHTML = '';
+
+            if (filtered.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-box">
+                        <i class="ph ph-ghost"></i>
+                        <p>Tidak ada buku di kategori ini.</p>
+                    </div>`;
+                return;
+            }
+
+            filtered.forEach(book => {
+                const el = document.createElement('div');
+                el.className = 'book-card';
+                
+                // Cover Logic
+                let coverHtml = '';
+                if(book.photo) {
+                    coverHtml = `<img src="${book.photo}" alt="cover">`;
+                } else {
+                    // Random cute color placeholder based on ID
+                    const colors = ['#FFC8DD', '#BDE0FE', '#A2D2FF', '#CDB4DB'];
+                    const color = colors[book.id.length % colors.length];
+                    coverHtml = `<div style="width:100%; height:100%; background:${color}; display:flex; align-items:center; justify-content:center; color:white; font-size:2rem;">
+                        <i class="ph-fill ph-book"></i>
+                    </div>`;
+                }
+
+                // Badge Logic
+                let badgeClass = 'st-todo';
+                let badgeText = 'Ingin Baca';
+                if(book.status === 'reading') { badgeClass = 'st-reading'; badgeText = 'Sedang Baca'; }
+                if(book.status === 'done') { badgeClass = 'st-done'; badgeText = 'Selesai'; }
+
+                el.innerHTML = `
+                    <div class="book-cover">
+                        ${coverHtml}
+                    </div>
+                    <div class="book-info">
+                        <div class="book-title">${book.title}</div>
+                        <div class="book-author"><i class="ph ph-pen-nib"></i> ${book.author}</div>
+                        <div class="status-badge ${badgeClass}">${badgeText}</div>
+                    </div>
+                    <div class="book-actions">
+                        <button class="icon-btn" onclick="dea.openModal('${book.id}')"><i class="ph-bold ph-pencil-simple"></i></button>
+                        <button class="icon-btn del" onclick="dea.delete('${book.id}')"><i class="ph-bold ph-trash"></i></button>
+                    </div>
+                `;
+                list.appendChild(el);
+            });
+        },
+
+        filter(status, btn) {
+            this.currentFilter = status;
+            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            this.render();
+        },
+
+        openModal(id = null) {
+            const modal = document.getElementById('modal');
+            const title = document.getElementById('modalTitle');
+            document.getElementById('bookForm').reset();
+            this.tempPhoto = null;
+            document.getElementById('imgPreview').style.display = 'none';
+            document.getElementById('uploadText').style.display = 'block';
+
+            if (id) {
+                const book = this.books.find(b => b.id === id);
+                title.innerText = "Edit Buku";
+                document.getElementById('bookId').value = book.id;
+                document.getElementById('inpTitle').value = book.title;
+                document.getElementById('inpAuthor').value = book.author;
+                document.getElementById('inpStatus').value = book.status;
+                
+                if(book.photo) {
+                    this.tempPhoto = book.photo;
+                    document.getElementById('imgPreview').src = book.photo;
+                    document.getElementById('imgPreview').style.display = 'block';
+                    document.getElementById('uploadText').style.display = 'none';
+                }
+            } else {
+                title.innerText = "Tambah Buku Baru";
+                document.getElementById('bookId').value = '';
+                document.getElementById('inpStatus').value = 'todo';
+            }
+
+            modal.classList.add('open');
+        },
+
+        closeModal() {
+            document.getElementById('modal').classList.remove('open');
+        },
+
+        handleFile(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.tempPhoto = e.target.result;
+                    document.getElementById('imgPreview').src = e.target.result;
+                    document.getElementById('imgPreview').style.display = 'block';
+                    document.getElementById('uploadText').style.display = 'none';
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        },
+
+        save() {
+            const id = document.getElementById('bookId').value;
+            const title = document.getElementById('inpTitle').value;
+            const author = document.getElementById('inpAuthor').value;
+            const status = document.getElementById('inpStatus').value;
+
+            const newBook = {
+                id: id || Date.now().toString(),
+                title, author, status,
+                photo: this.tempPhoto
+            };
+
+            if (id) {
+                const idx = this.books.findIndex(b => b.id === id);
+                if (idx !== -1) this.books[idx] = newBook;
+            } else {
+                this.books.unshift(newBook);
+            }
+
+            this.closeModal();
+            this.render();
+            this.showToast('Buku tersimpan di rak!');
+        },
+
+        delete(id) {
+            if(confirm('Hapus buku ini dari rak?')) {
+                this.books = this.books.filter(b => b.id !== id);
+                this.render();
+                this.showToast('Buku dihapus.');
+            }
+        },
+
+        showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+    };
+
+    dea.init();
+</script>
+
+</body>
+</html>
